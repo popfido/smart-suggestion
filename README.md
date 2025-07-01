@@ -169,13 +169,19 @@ export ANTHROPIC_API_KEY="your-anthropic-api-key"
 export GEMINI_API_KEY="your-gemini-api-key"
 ```
 
+#### DeepSeek
+
+```bash
+export DEEPSEEK_API_KEY="your-deepseek-api-key"
+```
+
 ### Environment Variables
 
 Configure the plugin behavior with these environment variables:
 
 | Variable | Description | Default | Options |
 |----------|-------------|---------|---------|
-| `SMART_SUGGESTION_AI_PROVIDER` | AI provider to use | Auto-detected | `openai`, `azure_openai`, `anthropic`, `gemini` |
+| `SMART_SUGGESTION_AI_PROVIDER` | AI provider to use | Auto-detected | `openai`, `azure_openai`, `anthropic`, `gemini`, `deepseek` |
 | `SMART_SUGGESTION_KEY` | Keybinding to trigger suggestions | `^o` | Any zsh keybinding |
 | `SMART_SUGGESTION_SEND_CONTEXT` | Send shell context to AI | `true` | `true`, `false` |
 | `SMART_SUGGESTION_PROXY_MODE` | Enable proxy mode for better context | `true` | `true`, `false` |

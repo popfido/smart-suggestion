@@ -359,6 +359,8 @@ func runFetch(cmd *cobra.Command, args []string) {
 		suggestion, err = fetchAnthropic()
 	case "gemini":
 		suggestion, err = fetchGemini()
+	case "deepseek":
+		suggestion, err = fetchDeepSeek()
 	default:
 		err = fmt.Errorf("unsupported provider: %s", provider)
 	}
@@ -384,9 +386,9 @@ func runFetch(cmd *cobra.Command, args []string) {
 
 	if debug {
 		logDebug("Successfully fetched suggestion", map[string]any{
-			"provider":           provider,
-			"input":              input,
-			"original_response":  suggestion,
+			"provider":          provider,
+			"input":             input,
+			"original_response": suggestion,
 			"parsed_suggestion": finalSuggestion,
 		})
 	}
@@ -697,6 +699,95 @@ func fetchAnthropic() (string, error) {
 	}
 
 	return response.Content[0].Text, nil
+}
+
+// fetchDeepSeek fetches suggestions from DeepSeek API
+func fetchDeepSeek() (string, error) {
+	apiKey := os.Getenv("DEEPSEEK_API_KEY")
+	if apiKey == "" {
+		return "", fmt.Errorf("DEEPSEEK_API_KEY environment variable is not set")
+	}
+
+	// DeepSeek API endpoint
+	url := "https://api.deepseek.com/v1/chat/completions"
+
+	// Create request payload using OpenAI-compatible format
+	// DeepSeek API is compatible with OpenAI's chat completions format
+	request := OpenAIRequest{
+		Model: "deepseek-chat", // DeepSeek's chat model
+		Messages: []OpenAIMessage{
+			{Role: "system", Content: systemPrompt},
+			{Role: "user", Content: input},
+		},
+	}
+
+	// Marshal request to JSON
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	// Log debug information if debug mode is enabled
+	if debug {
+		logDebug("Sending DeepSeek request", map[string]any{
+			"url":     url,
+			"request": string(jsonData),
+		})
+	}
+
+	// Create HTTP request
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set required headers for DeepSeek API
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	// Create HTTP client with timeout
+	client := &http.Client{Timeout: 30 * time.Second}
+
+	// Send the request
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response: %w", err)
+	}
+
+	// Log debug information if debug mode is enabled
+	if debug {
+		logDebug("Received DeepSeek response", map[string]any{
+			"status":   resp.Status,
+			"response": string(body),
+		})
+	}
+
+	// Check for HTTP errors
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	// Parse response using OpenAI-compatible format
+	// DeepSeek API returns responses in the same format as OpenAI
+	var response OpenAIResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return "", fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	// Validate response structure
+	if len(response.Choices) == 0 {
+		return "", fmt.Errorf("no choices returned from DeepSeek API")
+	}
+
+	// Extract and return the generated content
+	return response.Choices[0].Message.Content, nil
 }
 
 // writeToLogFile writes content to a log file with automatic rotation
