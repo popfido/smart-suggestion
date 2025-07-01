@@ -28,7 +28,7 @@ if [[ -z "$SMART_SUGGESTION_AI_PROVIDER" ]]; then
     elif [[ -n "$DEEPSEEK_API_KEY" ]]; then
         typeset -g SMART_SUGGESTION_AI_PROVIDER="deepseek"
     else
-        echo "No AI provider selected. Please set either OPENAI_API_KEY or AZURE_OPENAI_API_KEY (with AZURE_OPENAI_RESOURCE_NAME and AZURE_OPENAI_DEPLOYMENT_NAME) or ANTHROPIC_API_KEY or GEMINI_API_KEY."
+        echo "No AI provider selected. Please set either OPENAI_API_KEY or AZURE_OPENAI_API_KEY (with AZURE_OPENAI_RESOURCE_NAME and AZURE_OPENAI_DEPLOYMENT_NAME) or ANTHROPIC_API_KEY or GEMINI_API_KEY or DEEPSEEK_API_KEY."
         return 1
     fi
 fi

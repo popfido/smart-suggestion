@@ -287,7 +287,7 @@ func main() {
 	}
 
 	// Root command flags
-	rootCmd.Flags().StringVarP(&provider, "provider", "p", "", "AI provider (openai, azure_openai, anthropic, or gemini)")
+	rootCmd.Flags().StringVarP(&provider, "provider", "p", "", "AI provider (openai, azure_openai, anthropic, gemini, deepseek)")
 	rootCmd.Flags().StringVarP(&input, "input", "i", "", "User input")
 	rootCmd.Flags().StringVarP(&systemPrompt, "system", "s", "", "System prompt (optional, uses default if not provided)")
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "Enable debug logging")
